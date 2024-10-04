@@ -1,11 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QStringList>
-#include <QTimer>
-
 #include <QMainWindow>
-#include "compair.h"
+#include <QTimer>
+#include <QKeyEvent>
+#include <QEvent>
+#include <QMessageBox>
+#include <algorithm>
+#include <QSerialPortInfo>
+#include <QThread>
+#include "serialportsender.h"
+#include "serialportreceiver.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,23 +22,25 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    COMPair* ComPair;
+    SerialPortSender* sender;
+    SerialPortReceiver* receiver;
 
-    int receivedAmount;
+    int sendedAmount;
 
 public:
     MainWindow(QWidget *parent = nullptr);
+    bool eventFilter(QObject* obj, QEvent* event) override;
     ~MainWindow();
 
 private:
     Ui::MainWindow *ui;
-
     void checkSerialPorts();
+    void handleSend();
 
 private slots:
-    void handleRead();
-    void on_pushButton_clicked();
-    void on_comboBox_2_currentTextChanged(const QString &arg1);
-    void on_comboBox_currentTextChanged(const QString &arg1);
+    void handleRead(const QByteArray& data);
+    void handleStuff(const QByteArray& stuffedData);
+    void onReceiverComboBoxCurrentTextChanged(const QString &arg1);
+    void onSenderComboBoxCurrentTextChanged(const QString &arg1);
 };
 #endif // MAINWINDOW_H

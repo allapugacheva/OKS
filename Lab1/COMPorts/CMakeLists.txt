@@ -23,7 +23,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(COMPorts
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        compair.h compair.cpp
+
+        packet.h packet.cpp
+        serialport.h serialport.cpp
+        serialportsender.h serialportsender.cpp
+        serialportreceiver.h serialportreceiver.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET COMPorts APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

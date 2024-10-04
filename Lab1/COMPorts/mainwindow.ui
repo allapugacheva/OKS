@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>470</width>
-    <height>425</height>
+    <width>670</width>
+    <height>350</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="inputWindowLabel">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>110</y>
-      <width>441</width>
+      <width>300</width>
       <height>30</height>
      </rect>
     </property>
@@ -36,12 +36,12 @@
      <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="outputWindowLabel">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>200</y>
-      <width>431</width>
+      <x>350</x>
+      <y>110</y>
+      <width>300</width>
       <height>30</height>
      </rect>
     </property>
@@ -59,34 +59,12 @@
      <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>343</y>
-      <width>441</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Shape::NoFrame</enum>
-    </property>
-    <property name="text">
-     <string>Ввод - COM1; Вывод - COM2</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QComboBox" name="senderComboBox">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>60</y>
-      <width>200</width>
+      <width>300</width>
       <height>30</height>
      </rect>
     </property>
@@ -97,65 +75,28 @@
      </font>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit">
+   <widget class="QComboBox" name="receiverComboBox">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>350</x>
+      <y>60</y>
+      <width>300</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="outputWindowLine">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
       <y>140</y>
-      <width>430</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="comboBox_2">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>60</y>
-      <width>200</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-      <bold>true</bold>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>360</y>
-      <width>440</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Shape::NoFrame</enum>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="textEdit">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>230</y>
-      <width>430</width>
+      <width>300</width>
       <height>60</height>
      </rect>
     </property>
@@ -169,12 +110,12 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="senderSelectLabel">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>30</y>
-      <width>200</width>
+      <width>300</width>
       <height>30</height>
      </rect>
     </property>
@@ -188,12 +129,12 @@
      <string>Выбор порта передачи</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
+   <widget class="QLabel" name="receiverSelectLabel">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>350</x>
       <y>30</y>
-      <width>200</width>
+      <width>300</width>
       <height>30</height>
      </rect>
     </property>
@@ -207,12 +148,12 @@
      <string>Выбор порта приема</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
+   <widget class="QLabel" name="controlWindowLabel">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>430</width>
+      <width>630</width>
       <height>30</height>
      </rect>
     </property>
@@ -232,12 +173,12 @@
      <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_8">
+   <widget class="QLabel" name="controlWindowFrame">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>451</width>
+      <width>650</width>
       <height>90</height>
      </rect>
     </property>
@@ -248,28 +189,12 @@
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label_9">
+   <widget class="QLabel" name="inputWindowFrame">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>110</y>
-      <width>451</width>
-      <height>71</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Shape::Box</enum>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_10">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>200</y>
-      <width>451</width>
+      <width>320</width>
       <height>100</height>
      </rect>
     </property>
@@ -280,12 +205,28 @@
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label_11">
+   <widget class="QLabel" name="outputWindowFrame">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>110</y>
+      <width>320</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="statusWindowLabel">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>320</y>
-      <width>430</width>
+      <y>220</y>
+      <width>630</width>
       <height>30</height>
      </rect>
     </property>
@@ -302,13 +243,13 @@
      <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_12">
+   <widget class="QLabel" name="statusWindowFrame">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>320</y>
-      <width>451</width>
-      <height>95</height>
+      <y>220</y>
+      <width>650</width>
+      <height>120</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -318,29 +259,13 @@
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label_13">
-    <property name="geometry">
-     <rect>
-      <x>17</x>
-      <y>347</y>
-      <width>436</width>
-      <height>57</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Shape::Box</enum>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_14">
+   <widget class="QTextEdit" name="inputWindowLine">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>376</y>
-      <width>431</width>
-      <height>30</height>
+      <y>140</y>
+      <width>300</width>
+      <height>60</height>
      </rect>
     </property>
     <property name="font">
@@ -349,28 +274,38 @@
       <bold>true</bold>
      </font>
     </property>
-    <property name="text">
-     <string>TextLabel</string>
+   </widget>
+   <widget class="QTextEdit" name="statusWindowLine">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>250</y>
+      <width>630</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <bold>true</bold>
+     </font>
     </property>
    </widget>
-   <zorder>label</zorder>
-   <zorder>label_2</zorder>
-   <zorder>label_3</zorder>
-   <zorder>label_5</zorder>
-   <zorder>label_6</zorder>
-   <zorder>label_7</zorder>
-   <zorder>label_8</zorder>
-   <zorder>label_9</zorder>
-   <zorder>label_10</zorder>
-   <zorder>label_11</zorder>
-   <zorder>label_12</zorder>
-   <zorder>comboBox</zorder>
-   <zorder>comboBox_2</zorder>
-   <zorder>lineEdit</zorder>
-   <zorder>textEdit</zorder>
-   <zorder>label_13</zorder>
-   <zorder>label_14</zorder>
-   <zorder>label_4</zorder>
+   <zorder>inputWindowLabel</zorder>
+   <zorder>outputWindowLabel</zorder>
+   <zorder>senderSelectLabel</zorder>
+   <zorder>receiverSelectLabel</zorder>
+   <zorder>controlWindowLabel</zorder>
+   <zorder>controlWindowFrame</zorder>
+   <zorder>inputWindowFrame</zorder>
+   <zorder>outputWindowFrame</zorder>
+   <zorder>statusWindowLabel</zorder>
+   <zorder>statusWindowFrame</zorder>
+   <zorder>senderComboBox</zorder>
+   <zorder>receiverComboBox</zorder>
+   <zorder>outputWindowLine</zorder>
+   <zorder>inputWindowLine</zorder>
+   <zorder>statusWindowLine</zorder>
   </widget>
  </widget>
  <resources/>

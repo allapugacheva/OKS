@@ -1,187 +1,201 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    ComPair(new COMPair())
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), sender(new SerialPortSender(this)), receiver(new SerialPortReceiver(this)),sendedAmount(0)
 {
     ui->setupUi(this);
-    this->setFixedSize(470, 425);
+    this->setFixedSize(670, 350);
     this->setWindowTitle("COM передатчик 2000");
     this->setWindowIcon(QIcon("D:/OKS/Lab1/com.png"));
 
-    receivedAmount = 0;
-
-    ui->label_3->setText("Параметры COM-портов:");
-    ui->label_4->setText("Скорость передачи: 9600 бит/с, количество бит в 1 байте: 8");
-    ui->label_14->setText("Количество стоп-бит: 1, паритет: нет, управление потоком: нет");
+    ui->statusWindowLine->setText("Параметры COM-портов: скорость передачи: 9600 бит/с, количество бит в 1 байте: 8, количество стоп-бит: 1, паритет: нет, управление потоком: нет");
 
     checkSerialPorts();
 
-    connect(&ComPair->hComReceiver, &QSerialPort::readyRead, this, &MainWindow::handleRead);
-    connect(ui->lineEdit, &QLineEdit::returnPressed, this, &MainWindow::on_pushButton_clicked);
+    connect(receiver, &SerialPortReceiver::dataReceived, this, &MainWindow::handleRead);
+    connect(sender, &SerialPortSender::stuffed, this, &MainWindow::handleStuff);
+    connect(ui->senderComboBox, &QComboBox::currentTextChanged, this, &MainWindow::onSenderComboBoxCurrentTextChanged);
+    connect(ui->receiverComboBox, &QComboBox::currentTextChanged, this, &MainWindow::onReceiverComboBoxCurrentTextChanged);
+    ui->inputWindowLine->installEventFilter(this);
 
     QTimer* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::checkSerialPorts);
     timer->start(5000);
 }
 
-MainWindow::~MainWindow()
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
+    if(obj == ui->inputWindowLine && event->type() == QEvent::KeyPress) {
+
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        if(keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return) {
+
+            handleSend();
+            return true;
+        }
+    }
+    return QObject::eventFilter(obj, event);
+}
+
+MainWindow::~MainWindow() {
     delete ui;
-    delete ComPair;
+    delete sender;
+    delete receiver;
 }
 
 void MainWindow::checkSerialPorts()
 {
-    ui->comboBox->blockSignals(true);
-    ui->comboBox_2->blockSignals(true);
+    ui->senderComboBox->blockSignals(true);
+    ui->receiverComboBox->blockSignals(true);
 
-    QString senderName = "порт не задан", senderPair = "", receiverName = "порт не задан", receiverPair = "";
-    if(ComPair != nullptr) {
-        if(ComPair->hComSender.isOpen()) {
-            senderName = ComPair->hComSender.portName();
-            senderPair = QString("COM") + QString::number(senderName.mid(3).toInt() + 1);
-        }
-        if(ComPair->hComReceiver.isOpen()) {
-            receiverName = ComPair->hComReceiver.portName();
-            receiverPair = QString("COM") + QString::number(receiverName.mid(3).toInt() - 1);
-        }
+    QString senderName = "", senderPair = "", receiverName = "", receiverPair = "";
+    if(sender != nullptr && sender->isOpen()) {
+        senderName = sender->getPortName();
+        senderPair = QString("COM") + QString::number(senderName.mid(3).toInt() + 1);
+    }
+    if(receiver != nullptr && receiver->isOpen()) {
+        receiverName = receiver->getPortName();
+        receiverPair = QString("COM") + QString::number(receiverName.mid(3).toInt() - 1);
     }
 
+    ui->senderComboBox->clear();
+    ui->receiverComboBox->clear();
+
+    ui->senderComboBox->addItem("порт не задан");
+    ui->receiverComboBox->addItem("порт не задан");
+
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
-
-    ports.removeIf([&](const QSerialPortInfo& portInfo){
-        return ((portInfo.portName() == senderPair) || (portInfo.portName() == receiverPair) || (portInfo.portName() == senderName) || (portInfo.portName() == receiverName));
-    });
-
-    QStringList available;
-
     for(int i = 0; i < ports.size(); i++) {
+
+        if(ports[i].portName() == senderPair || ports[i].portName() == receiverPair)
+            continue;
+
+        if(senderName != "" && ports[i].portName() == senderName) {
+            ui->senderComboBox->addItem(senderName);
+            ui->senderComboBox->setCurrentText(senderName);
+        }
+
+        if(receiverName != "" && ports[i].portName() == receiverName) {
+            ui->receiverComboBox->addItem(receiverName);
+            ui->receiverComboBox->setCurrentText(receiverName);
+        }
 
         QSerialPort tempPort;
         tempPort.setPortName(ports[i].portName());
-
         if(tempPort.open(QIODevice::ReadWrite)) {
+
             tempPort.close();
-
-            available.append(ports[i].portName());
+            ui->senderComboBox->addItem(ports[i].portName());
+            ui->receiverComboBox->addItem(ports[i].portName());
         }
     }
 
-    if(receiverName != "порт не задан")
-        available.append(receiverName);
-
-    available.sort();
-    available.prepend("порт не задан");
-
-    ui->comboBox_2->clear();
-    ui->comboBox_2->addItems(available);
-
-    if(receiverName != "порт не задан")
-        ui->comboBox_2->setCurrentText(receiverName);
-
-    available.removeAll("порт не задан");
-    if(receiverName != "порт не задан")
-        available.removeAll(receiverName);
-
-    if(senderName != "порт не задан")
-        available.append(senderName);
-
-    available.sort();
-    available.prepend("порт не задан");
-
-    ui->comboBox->clear();
-    ui->comboBox->addItems(available);
-
-    if(senderName != "порт не задан")
-        ui->comboBox->setCurrentText(senderName);
-
-    ui->comboBox->blockSignals(false);
-    ui->comboBox_2->blockSignals(false);
+    ui->senderComboBox->blockSignals(false);
+    ui->receiverComboBox->blockSignals(false);
 }
 
-void MainWindow::handleRead()
+void MainWindow::handleRead(const QByteArray& data)
 {
-    QByteArray data = ComPair->hComReceiver.readAll();
+    ui->outputWindowLine->setText(data);
+}
 
-    if(ui->label_4->text() != "") {
-        ui->label_4->setText("");
-        ui->label_14->setText("");
+void MainWindow::handleStuff(const QByteArray &stuffedData)
+{
+    sendedAmount += stuffedData.size();
+
+    QString temp = stuffedData.toHex().toUpper();
+    for(int i = 2; i < temp.length(); i+=3)
+        temp.insert(i, ' ');
+    int tIndex = temp.indexOf("40 65");
+    while(tIndex != -1) {
+        temp.insert(tIndex, '\n');
+        tIndex = temp.indexOf("40 65", tIndex + 5);
     }
-    ui->textEdit->setText(data);
 
-    switch((++receivedAmount) % 10) {
-    case 1:
-        if(receivedAmount % 100 != 11)
-            ui->label_3->setText(QString("Получена ") + QString::number(receivedAmount) + QString(" порция данных."));
-        else
-            ui->label_3->setText(QString("Получено ") + QString::number(receivedAmount) + QString(" порций данных."));
-        break;
-    case 2:
-    case 3:
-    case 4:
-        if(receivedAmount % 100 < 12 || receivedAmount % 100 > 14)
-            ui->label_3->setText(QString("Получено ") + QString::number(receivedAmount) + QString(" порции данных."));
-        else
-            ui->label_3->setText(QString("Получено ") + QString::number(receivedAmount) + QString(" порций данных."));
-        break;
-    default:
-        ui->label_3->setText(QString("Получено ") + QString::number(receivedAmount) + QString(" порций данных."));
-        break;
+    QString hexData = QString("Отправлено ") + QString::number(sendedAmount) + ((sendedAmount % 2 ==0 || sendedAmount % 4 == 0) ? QString(" байта.\n") : QString("байт.\n"))
+                      + QString("Структура кадров после байт-стаффинга (в шестнадцатеричном виде):") + temp;
+    ui->statusWindowLine->setPlainText(hexData);
+    QTextCharFormat format;
+    format.setForeground(Qt::red);
+    QString sequence = "7D 5D 7D 5E";
+    int index = hexData.indexOf(sequence);
+    QTextCursor cursor(ui->statusWindowLine->document());
+
+    while(index != -1) {
+
+        cursor.setPosition(index);
+        cursor.setPosition(index + 11, QTextCursor::KeepAnchor);
+
+        cursor.mergeCharFormat(format);
+
+        index = hexData.indexOf(sequence, index + 11);
+    }
+
+    sequence = "7D 5F";
+    index = hexData.indexOf(sequence);
+
+    while(index != -1) {
+
+        cursor.setPosition(index);
+        cursor.setPosition(index + 5, QTextCursor::KeepAnchor);
+
+        cursor.mergeCharFormat(format);
+
+        index = hexData.indexOf(sequence, index + 5);
     }
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::handleSend()
 {
-    if(!ComPair->hComSender.isOpen())
-        QMessageBox::critical(this, "Ошибка при отправке данных", "Выберите COM порт");
-    else if(ui->lineEdit->text() == "")
-        QMessageBox::critical(this, "Ошибка при отправке данных", "Введите данные");
-    else {
-        QByteArray writeData = ui->lineEdit->text().toUtf8();
-        if(ComPair->hComSender.write(writeData) == -1)
-            QMessageBox::critical(this, "Ошибка при отправке данных", ComPair->hComSender.errorString());
-        ui->lineEdit->setText("");
-    }
-}
-
-void MainWindow::on_comboBox_currentTextChanged(const QString &portName)
-{
-    if(ComPair != nullptr) {
-        try {
-            if(portName != "не задан")
-                ComPair->changeSender(portName);
-            else
-                ComPair->hComSender.close();
+    try {
+        if(!sender->isOpen())
+            QMessageBox::critical(this, "Ошибка при отправке данных", "Выберите COM порт");
+        else if(ui->inputWindowLine->toPlainText() == "")
+            QMessageBox::critical(this, "Ошибка при отправке данных", "Введите данные");
+        else {
+            sender->send(ui->inputWindowLine->toPlainText());
+            ui->inputWindowLine->clear();
         }
-        catch(...) {
-
-            QMessageBox::critical(this, "Ошибка", "Не удалось изменить COM порт.");
-            ui->comboBox->setCurrentText(ComPair->hComSender.portName());
-        }
-
-        checkSerialPorts();
+    }
+    catch(...) {
+        QMessageBox::critical(this, "Ошибка при отправке данных", "Данные не были отправлены корректно");
     }
 }
 
-void MainWindow::on_comboBox_2_currentTextChanged(const QString &portName)
+void MainWindow::onSenderComboBoxCurrentTextChanged(const QString &portName)
 {
-    if(ComPair != nullptr) {
+    if(sender != nullptr) {
         try {
             if(portName != "порт не задан")
-                ComPair->changeReceiver(portName);
+                sender->changePort(portName);
             else
-                ComPair->hComReceiver.close();
+                sender->close();
         }
         catch(...) {
 
             QMessageBox::critical(this, "Ошибка", "Не удалось изменить COM порт.");
-            ui->comboBox_2->setCurrentText(ComPair->hComReceiver.portName());
+            ui->senderComboBox->setCurrentIndex(0);
         }
 
         checkSerialPorts();
     }
 }
 
+void MainWindow::onReceiverComboBoxCurrentTextChanged(const QString &portName)
+{
+    if(receiver != nullptr) {
+        try {
+            if(portName != "порт не задан")
+                receiver->changePort(portName);
+            else
+                receiver->close();
+        }
+        catch(...) {
+
+            QMessageBox::critical(this, "Ошибка", "Не удалось изменить COM порт.");
+            ui->receiverComboBox->setCurrentIndex(0);
+        }
+
+        checkSerialPorts();
+    }
+}

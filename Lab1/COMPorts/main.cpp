@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include "packet.h"
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
