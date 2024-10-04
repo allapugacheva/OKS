@@ -9,6 +9,8 @@ SerialPort::SerialPort(QObject* parent) : QObject(parent) {
     hSerialPort->setStopBits(QSerialPort::OneStop);
     hSerialPort->setFlowControl(QSerialPort::NoFlowControl);
     p = new Packet();
+
+    QSerialPort::Baud
 }
 
 SerialPort::~SerialPort() {
